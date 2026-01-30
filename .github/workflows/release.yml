@@ -1,0 +1,60 @@
+name: Release ZIP
+
+on:
+  push:
+    tags:
+      - '*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          tools: composer
+
+      - name: Install JS deps
+        run: npm ci
+
+      - name: Build assets
+        run: npm run build
+
+      - name: Install Composer deps
+        run: composer install --no-dev --optimize-autoloader
+
+      - name: Create release ZIP
+        run: |
+          PLUGIN_SLUG=accordion-json-ld
+          RELEASE_DIR=dist/$PLUGIN_SLUG
+          mkdir -p "$RELEASE_DIR"
+          rsync -a \
+            --exclude='.git/' \
+            --exclude='.github/' \
+            --exclude='node_modules/' \
+            --exclude='src/' \
+            --exclude='dist/' \
+            --exclude='.DS_Store' \
+            --exclude='**/.DS_Store' \
+            ./ "$RELEASE_DIR/"
+          cd dist
+          zip -r "${PLUGIN_SLUG}.zip" "$PLUGIN_SLUG"
+
+      - name: Upload release asset
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/accordion-json-ld.zip

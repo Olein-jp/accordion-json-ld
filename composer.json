@@ -1,0 +1,12 @@
+{
+  "name": "olein/accordion-json-ld",
+  "description": "Accordion JSON-LD plugin",
+  "type": "wordpress-plugin",
+  "license": "GPL-2.0-or-later",
+  "require": {
+    "inc2734/wp-github-plugin-updater": "^2.0"
+  },
+  "autoload": {
+    "files": []
+  }
+}
