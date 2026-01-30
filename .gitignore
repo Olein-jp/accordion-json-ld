@@ -2,3 +2,10 @@ node_modules
 build
 .codex
 .DS_Store
+.phpcs-cache
+vendor/bin
+vendor/phpcsstandards
+vendor/dealerdirect
+vendor/squizlabs
+vendor/wp-coding-standards
+vendor/composer

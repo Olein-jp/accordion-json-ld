@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Accordion JSON-LD
  * Description: Generates FAQPage JSON-LD from the core Accordion block and outputs it in wp_head.
- * Version: 0.3.0
+ * Version: 0.4.0
  * Author: Koji Kuno
  * Requires at least: 6.9
  * Requires PHP: 8.3
@@ -10,9 +10,7 @@
  * Domain Path: /languages
  * License: GPL 2.0 or later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
- */
-
-/**
+ *
  * @package Accordion_JSON_LD
  */
 
@@ -28,7 +26,9 @@ if ( file_exists( $accordion_json_ld_autoload ) && file_exists( $accordion_json_
 }
 
 /**
- * 初期化。
+ * Initialize hooks.
+ *
+ * @return void
  */
 function accordion_json_ld_init() {
 	add_action( 'init', 'accordion_json_ld_load_textdomain' );
@@ -38,7 +38,9 @@ function accordion_json_ld_init() {
 }
 
 /**
- * GitHub プラグインアップデータを初期化。
+ * Initialize the GitHub plugin updater.
+ *
+ * @return void
  */
 function accordion_json_ld_bootstrap_github_updater() {
 	if ( ! class_exists( 'Inc2734\\WP_GitHub_Plugin_Updater\\Bootstrap' ) ) {
@@ -53,7 +55,9 @@ function accordion_json_ld_bootstrap_github_updater() {
 }
 
 /**
- * 翻訳ファイルを読み込み。
+ * Load translation files.
+ *
+ * @return void
  */
 function accordion_json_ld_load_textdomain() {
 	load_plugin_textdomain(
@@ -64,7 +68,9 @@ function accordion_json_ld_load_textdomain() {
 }
 
 /**
- * ブロックエディター用スクリプトを読み込み。
+ * Enqueue block editor assets.
+ *
+ * @return void
  */
 function accordion_json_ld_enqueue_editor_assets() {
 	$script_path = __DIR__ . '/build/index.js';
@@ -76,7 +82,7 @@ function accordion_json_ld_enqueue_editor_assets() {
 	}
 
 	$script_version = filemtime( $script_path );
-	$asset = array(
+	$asset          = array(
 		'dependencies' => array(
 			'wp-blocks',
 			'wp-hooks',
@@ -110,7 +116,9 @@ function accordion_json_ld_enqueue_editor_assets() {
 }
 
 /**
- * JSON-LD を出力。
+ * Output JSON-LD.
+ *
+ * @return void
  */
 function accordion_json_ld_output_json_ld() {
 	if ( ! is_singular() ) {
@@ -175,10 +183,10 @@ function accordion_json_ld_output_json_ld() {
 }
 
 /**
- * 再帰的に Q&A を抽出。
+ * Recursively extract Q&A items.
  *
- * @param array $blocks ブロック配列。
- * @return array
+ * @param array $blocks Block array.
+ * @return array Q&A items for FAQ schema.
  */
 function accordion_json_ld_extract_qa_items( $blocks ) {
 	$items = array();
@@ -211,10 +219,10 @@ function accordion_json_ld_extract_qa_items( $blocks ) {
 }
 
 /**
- * アコーディオン内容ブロックから Q&A を抽出。
+ * Extract Q&A from an accordion content block.
  *
- * @param array $block ブロック。
- * @return array|null
+ * @param array $block Block data.
+ * @return array|null FAQ item data or null when incomplete.
  */
 function accordion_json_ld_extract_qa_from_accordion_content( $block ) {
 	if ( empty( $block['innerBlocks'] ) || ! is_array( $block['innerBlocks'] ) ) {
@@ -259,10 +267,10 @@ function accordion_json_ld_extract_qa_from_accordion_content( $block ) {
 }
 
 /**
- * ブロックからプレーンテキストを抽出。
+ * Extract plain text from a block.
  *
- * @param array $block ブロック。
- * @return string
+ * @param array $block Block data.
+ * @return string Extracted text.
  */
 function accordion_json_ld_extract_text_from_block( $block ) {
 	$text = '';
@@ -279,7 +287,7 @@ function accordion_json_ld_extract_text_from_block( $block ) {
 		$text = implode( ' ', $block['innerContent'] );
 	}
 
-	// aria-hidden の装飾文字（例: 開閉アイコン）を除外。
+	// Exclude aria-hidden decorative characters (e.g. toggle icons).
 	$text = preg_replace( '/<[^>]*aria-hidden=("|\')true\\1[^>]*>.*?<\\/[^>]+>/i', ' ', (string) $text );
 	$text = wp_strip_all_tags( $text, true );
 	$text = preg_replace( '/\s+/', ' ', (string) $text );
@@ -288,10 +296,10 @@ function accordion_json_ld_extract_text_from_block( $block ) {
 }
 
 /**
- * ブロック名を取得。
+ * Get the block name.
  *
- * @param array $block ブロック配列。
- * @return string
+ * @param array $block Block data.
+ * @return string Block name or empty string.
  */
 function accordion_json_ld_get_block_name( $block ) {
 	if ( ! is_array( $block ) ) {
@@ -304,10 +312,10 @@ function accordion_json_ld_get_block_name( $block ) {
 }
 
 /**
- * アコーディオン内容ブロック判定。
+ * Check if the block is an accordion content block.
  *
- * @param string $block_name ブロック名。
- * @return bool
+ * @param string $block_name Block name.
+ * @return bool True if the block matches an accordion content block.
  */
 function accordion_json_ld_is_accordion_content_block( $block_name ) {
 	$block_name = accordion_json_ld_normalize_block_name( $block_name );
@@ -324,10 +332,10 @@ function accordion_json_ld_is_accordion_content_block( $block_name ) {
 }
 
 /**
- * アコーディオンコンテナブロック判定。
+ * Check if the block is an accordion container block.
  *
- * @param string $block_name ブロック名。
- * @return bool
+ * @param string $block_name Block name.
+ * @return bool True if the block matches an accordion container block.
  */
 function accordion_json_ld_is_accordion_container_block( $block_name ) {
 	$block_name = accordion_json_ld_normalize_block_name( $block_name );
@@ -339,19 +347,19 @@ function accordion_json_ld_is_accordion_container_block( $block_name ) {
 		return true;
 	}
 
-	$needle = '/accordion';
-	if ( strlen( $block_name ) < strlen( $needle ) ) {
+	$needle_length = strlen( '/accordion' );
+	if ( strlen( $block_name ) < $needle_length ) {
 		return false;
 	}
 
-	return $needle === substr( $block_name, -strlen( $needle ) );
+	return '/accordion' === substr( $block_name, -$needle_length );
 }
 
 /**
- * ブロックの JSON-LD 出力可否を判定。
+ * Check whether JSON-LD output is enabled for a block.
  *
- * @param array $block ブロック。
- * @return bool
+ * @param array $block Block data.
+ * @return bool True if JSON-LD output is enabled for the block.
  */
 function accordion_json_ld_is_json_ld_enabled_for_block( $block ) {
 	if ( ! is_array( $block ) ) {
@@ -370,10 +378,10 @@ function accordion_json_ld_is_json_ld_enabled_for_block( $block ) {
 }
 
 /**
- * アコーディオン見出しブロック判定。
+ * Check if the block is an accordion header block.
  *
- * @param string $block_name ブロック名。
- * @return bool
+ * @param string $block_name Block name.
+ * @return bool True if the block matches an accordion header block.
  */
 function accordion_json_ld_is_accordion_header_block( $block_name ) {
 	$block_name = accordion_json_ld_normalize_block_name( $block_name );
@@ -390,10 +398,10 @@ function accordion_json_ld_is_accordion_header_block( $block_name ) {
 }
 
 /**
- * アコーディオン本文ブロック判定。
+ * Check if the block is an accordion panel block.
  *
- * @param string $block_name ブロック名。
- * @return bool
+ * @param string $block_name Block name.
+ * @return bool True if the block matches an accordion panel block.
  */
 function accordion_json_ld_is_accordion_panel_block( $block_name ) {
 	$block_name = accordion_json_ld_normalize_block_name( $block_name );
@@ -408,10 +416,10 @@ function accordion_json_ld_is_accordion_panel_block( $block_name ) {
 }
 
 /**
- * ブロック名を正規化。
+ * Normalize a block name.
  *
- * @param string $block_name ブロック名。
- * @return string
+ * @param string $block_name Block name.
+ * @return string Normalized block name.
  */
 function accordion_json_ld_normalize_block_name( $block_name ) {
 	return is_string( $block_name ) ? strtolower( $block_name ) : '';
