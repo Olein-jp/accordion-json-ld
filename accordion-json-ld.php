@@ -50,7 +50,10 @@ function accordion_json_ld_bootstrap_github_updater() {
 	new Inc2734\WP_GitHub_Plugin_Updater\Bootstrap(
 		plugin_basename( __FILE__ ),
 		'Olein-jp',
-		'accordion-json-ld'
+		'accordion-json-ld',
+		[
+			'description_url' => __DIR__ . '/readme.txt',
+		]
 	);
 }
 
