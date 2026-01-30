@@ -4,7 +4,7 @@ Tags: accordion, json-ld, faq, schema
 Requires at least: 6.9
 Tested up to: 6.9
 Requires PHP: 8.3
-Stable tag: 0.2.0
+Stable tag: 0.3.0
 License: GPL 2.0 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -33,6 +33,9 @@ Please check the following:
 
 == Changelog ==
 
+= 0.3.0 =
+* Maintenance release.
+
 = 0.2.0 =
 * Translate readme.txt
 
@@ -40,6 +43,9 @@ Please check the following:
 * Initial release
 
 == Upgrade Notice ==
+
+= 0.3.0 =
+* Maintenance release.
 
 = 0.2.0 =
 * Add JSON-LD toggle in the block inspector.

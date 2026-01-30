@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Accordion JSON-LD
  * Description: Generates FAQPage JSON-LD from the core Accordion block and outputs it in wp_head.
- * Version: 0.2.0
+ * Version: 0.3.0
  * Author: Koji Kuno
  * Requires at least: 6.9
  * Requires PHP: 8.3
@@ -22,7 +22,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 // Composer autoload (optional for GitHub updater).
 $accordion_json_ld_autoload = __DIR__ . '/vendor/autoload.php';
-if ( file_exists( $accordion_json_ld_autoload ) ) {
+$accordion_json_ld_updater  = __DIR__ . '/vendor/inc2734/wp-github-plugin-updater/src/Bootstrap.php';
+if ( file_exists( $accordion_json_ld_autoload ) && file_exists( $accordion_json_ld_updater ) ) {
 	require_once $accordion_json_ld_autoload;
 }
 
@@ -74,6 +75,7 @@ function accordion_json_ld_enqueue_editor_assets() {
 		return;
 	}
 
+	$script_version = filemtime( $script_path );
 	$asset = array(
 		'dependencies' => array(
 			'wp-blocks',
@@ -83,7 +85,7 @@ function accordion_json_ld_enqueue_editor_assets() {
 			'wp-components',
 			'wp-block-editor',
 		),
-		'version'      => filemtime( $script_path ),
+		'version'      => $script_version,
 	);
 
 	if ( file_exists( $asset_path ) ) {
@@ -94,7 +96,7 @@ function accordion_json_ld_enqueue_editor_assets() {
 		'accordion-json-ld-editor',
 		$script_url,
 		isset( $asset['dependencies'] ) ? $asset['dependencies'] : array(),
-		isset( $asset['version'] ) ? $asset['version'] : filemtime( $script_path ),
+		isset( $asset['version'] ) ? $asset['version'] : $script_version,
 		true
 	);
 
@@ -186,7 +188,7 @@ function accordion_json_ld_extract_qa_items( $blocks ) {
 			continue;
 		}
 
-		$block_name = isset( $block['blockName'] ) ? $block['blockName'] : '';
+		$block_name = accordion_json_ld_get_block_name( $block );
 		if ( accordion_json_ld_is_accordion_container_block( $block_name ) ) {
 			if ( ! accordion_json_ld_is_json_ld_enabled_for_block( $block ) ) {
 				continue;
@@ -227,7 +229,7 @@ function accordion_json_ld_extract_qa_from_accordion_content( $block ) {
 			continue;
 		}
 
-		$inner_name = isset( $inner['blockName'] ) ? $inner['blockName'] : '';
+		$inner_name = accordion_json_ld_get_block_name( $inner );
 		if ( '' === $question && accordion_json_ld_is_accordion_header_block( $inner_name ) ) {
 			$question = accordion_json_ld_extract_text_from_block( $inner );
 			continue;
@@ -278,11 +280,27 @@ function accordion_json_ld_extract_text_from_block( $block ) {
 	}
 
 	// aria-hidden の装飾文字（例: 開閉アイコン）を除外。
-	$text = preg_replace( '/<[^>]*aria-hidden=("|\')true\\1[^>]*>.*?<\\/[^>]+>/i', ' ', $text );
+	$text = preg_replace( '/<[^>]*aria-hidden=("|\')true\\1[^>]*>.*?<\\/[^>]+>/i', ' ', (string) $text );
 	$text = wp_strip_all_tags( $text, true );
-	$text = preg_replace( '/\s+/', ' ', $text );
+	$text = preg_replace( '/\s+/', ' ', (string) $text );
 
 	return is_string( $text ) ? $text : '';
+}
+
+/**
+ * ブロック名を取得。
+ *
+ * @param array $block ブロック配列。
+ * @return string
+ */
+function accordion_json_ld_get_block_name( $block ) {
+	if ( ! is_array( $block ) ) {
+		return '';
+	}
+
+	return isset( $block['blockName'] ) && is_string( $block['blockName'] )
+		? $block['blockName']
+		: '';
 }
 
 /**
@@ -292,11 +310,10 @@ function accordion_json_ld_extract_text_from_block( $block ) {
  * @return bool
  */
 function accordion_json_ld_is_accordion_content_block( $block_name ) {
-	if ( ! is_string( $block_name ) ) {
+	$block_name = accordion_json_ld_normalize_block_name( $block_name );
+	if ( '' === $block_name ) {
 		return false;
 	}
-
-	$block_name = strtolower( $block_name );
 
 	return (
 		'core/accordion-content' === $block_name ||
@@ -313,11 +330,10 @@ function accordion_json_ld_is_accordion_content_block( $block_name ) {
  * @return bool
  */
 function accordion_json_ld_is_accordion_container_block( $block_name ) {
-	if ( ! is_string( $block_name ) ) {
+	$block_name = accordion_json_ld_normalize_block_name( $block_name );
+	if ( '' === $block_name ) {
 		return false;
 	}
-
-	$block_name = strtolower( $block_name );
 
 	if ( 'core/accordion' === $block_name ) {
 		return true;
@@ -360,11 +376,10 @@ function accordion_json_ld_is_json_ld_enabled_for_block( $block ) {
  * @return bool
  */
 function accordion_json_ld_is_accordion_header_block( $block_name ) {
-	if ( ! is_string( $block_name ) ) {
+	$block_name = accordion_json_ld_normalize_block_name( $block_name );
+	if ( '' === $block_name ) {
 		return false;
 	}
-
-	$block_name = strtolower( $block_name );
 
 	return (
 		'core/accordion-header' === $block_name ||
@@ -381,16 +396,25 @@ function accordion_json_ld_is_accordion_header_block( $block_name ) {
  * @return bool
  */
 function accordion_json_ld_is_accordion_panel_block( $block_name ) {
-	if ( ! is_string( $block_name ) ) {
+	$block_name = accordion_json_ld_normalize_block_name( $block_name );
+	if ( '' === $block_name ) {
 		return false;
 	}
-
-	$block_name = strtolower( $block_name );
 
 	return (
 		'core/accordion-panel' === $block_name ||
 		false !== strpos( $block_name, 'accordion-panel' )
 	);
+}
+
+/**
+ * ブロック名を正規化。
+ *
+ * @param string $block_name ブロック名。
+ * @return string
+ */
+function accordion_json_ld_normalize_block_name( $block_name ) {
+	return is_string( $block_name ) ? strtolower( $block_name ) : '';
 }
 
 accordion_json_ld_init();
