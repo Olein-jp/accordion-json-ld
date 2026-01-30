@@ -4,39 +4,46 @@ Tags: accordion, json-ld, faq, schema
 Requires at least: 6.9
 Tested up to: 6.9
 Requires PHP: 8.3
-Stable tag: 0.1.0
+Stable tag: 0.2.0
 License: GPL 2.0 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-コアのアコーディオンブロックから FAQPage の JSON-LD を生成し、wp_head に出力します。
+Generates FAQPage JSON-LD from the core Accordion block and outputs it in wp_head.
 
 == Description ==
 
-アコーディオンブロックを FAQ として使う場合に、FAQPage の JSON-LD を自動生成します。
-ブロックインスペクターの「構造化データ（JSON-LD）を出力する」トグルがオンのときのみ出力します。
+When you use the Accordion block as an FAQ, this plugin automatically generates FAQPage JSON-LD.
+It outputs JSON-LD only when the “Output structured data (JSON-LD)” toggle in the block inspector is enabled.
 
 == Installation ==
 
-1. プラグインをアップロードし有効化します。
-2. 投稿でコアのアコーディオンブロックを挿入します。
-3. アコーディオンブロックのインスペクターで JSON-LD 出力をオンにします。
+1. Upload and activate the plugin.
+2. Insert the core Accordion block in a post.
+3. Turn on JSON-LD output from the Accordion block inspector.
 
 == Frequently Asked Questions ==
 
-= JSON-LD が出力されません =
+= JSON-LD is not output =
 
-以下を確認してください。
+Please check the following:
 
-* 対象ページが単一表示である
-* アコーディオンブロックのトグルがオンになっている
-* テーマで wp_head() が呼ばれている
+* The page is a singular view.
+* The Accordion block toggle is enabled.
+* The theme calls wp_head().
 
 == Changelog ==
 
+= 0.2.0 =
+* Translate readme.txt
+
 = 0.1.0 =
-* 初版
+* Initial release
 
 == Upgrade Notice ==
 
+= 0.2.0 =
+* Add JSON-LD toggle in the block inspector.
+* Add GitHub updater and release workflow.
+
 = 0.1.0 =
-* 初版
+* Initial release

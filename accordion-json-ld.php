@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Accordion JSON-LD
  * Description: Generates FAQPage JSON-LD from the core Accordion block and outputs it in wp_head.
- * Version: 0.1.0
+ * Version: 0.2.0
  * Author: Koji Kuno
  * Requires at least: 6.9
  * Requires PHP: 8.3
